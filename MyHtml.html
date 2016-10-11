@@ -1,0 +1,63 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+	<head>
+		<title>MyHtml.html</title>
+
+		<meta http-equiv="keywords" content="keyword1,keyword2,keyword3">
+		<meta http-equiv="description" content="this is my page">
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+		
+ 		<link rel="stylesheet" href="https://unpkg.com/leaflet@1.0.1/dist/leaflet.css" />
+ 		<script src="https://unpkg.com/leaflet@1.0.1/dist/leaflet.js"></script>
+		<!--<link rel="stylesheet" href="leaflet/leaflet.css" />
+		<script src="leaflet/leaflet.js"></script>
+		-->
+		<script>
+			window.onload = function (){
+				//set the default location to Beijing
+				var mymap = L.map('mapid').setView([39.91, 116.39], 13);
+				L.tileLayer('http://map.zhtu.net:8080/r3t-basemap/{z}/{x}/{y}/tile.jpg',{
+					maxZoom: 18,
+					attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, ' +
+						'<a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
+						'Imagery © <a href="http://mapbox.com">Mapbox</a>',
+					id: 'mapbox.streets'
+				}).addTo(mymap);
+				//set a scale on the topright corner
+				L.control.scale({ position: 'topright' }).addTo(mymap); 
+				
+				var arr = new Array();
+				var i = 0;
+			    var file; 
+			    var fso = new ActiveXObject("Scripting.FileSystemObject"); 
+			    var fname = "traceInfo.txt"; 
+				if(!fso.FileExists(fname)) { 
+					file = fso.CreateTextFile(fname);
+			    }
+			    //cancel the default doubleClick event and add the new one
+			    //which pops up markers, draws lines and write the location in the file 
+				mymap.doubleClickZoom.disable();
+				function onMapDblClick(e) {
+					var loc = e.latlng;
+					var marker = L.marker(loc).addTo(mymap);
+					marker.bindPopup(""+loc).openPopup();
+					arr[i] = loc;
+					if(i>0)
+					L.polyline([arr[i-1], arr[i]], {color: 'red'}).addTo(mymap);
+					i++;
+					file = fso.OpenTextFile(fname,8); 
+					file.Write(loc+"\r\n"); 
+					file.Close();
+				}
+				mymap.on('dblclick', onMapDblClick);
+			}
+		</script>
+		<style type="text/css">
+    		#mapid { height: 380px;}
+    	</style>
+	</head>
+
+	<body>
+		<div id="mapid"></div>
+	</body>
+</html>
